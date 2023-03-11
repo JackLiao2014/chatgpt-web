@@ -92,7 +92,7 @@ async function onConversation() {
   scrollToBottom()
 
   try {
-    let lastText = ''
+    // let lastText = ''
     const fetchChatAPIOnce = async () => {
       await fetchChatAPIProcess<Chat.ConversationResponse>({
         prompt: message,
@@ -101,33 +101,23 @@ async function onConversation() {
         onDownloadProgress: ({ event }) => {
           const xhr = event.target
           const { responseText } = xhr
-          // Always process the final line
-          const lastIndex = responseText.lastIndexOf('\n')
+
           let chunk = responseText
-          if (lastIndex !== -1)
-            chunk = responseText.substring(lastIndex)
+					console.log('chunk')
+					console.log(chunk)
           try {
-            const data = JSON.parse(chunk)
             updateChat(
               +uuid,
               dataSources.value.length - 1,
               {
                 dateTime: new Date().toLocaleString(),
-                text: lastText + data.text ?? '',
+								text: responseText ?? '',
                 inversion: false,
                 error: false,
                 loading: false,
-                conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
                 requestOptions: { prompt: message, options: { ...options } },
               },
             )
-
-            if (openLongReply && data.detail.choices[0].finish_reason === 'length') {
-              options.parentMessageId = data.id
-              lastText = data.text
-              message = ''
-              return fetchChatAPIOnce()
-            }
 
             scrollToBottom()
           }
